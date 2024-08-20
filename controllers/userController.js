@@ -45,7 +45,7 @@ const signin_controller=async(req,res)=>{
 
         //  if password match
         if(comparepasssword){
-            const token=jwt.sign({id:findemail._id},process.env.JWT_SECRET_CODE,{
+            const token=jwt.sign({id:findemail._id},"ksjdsjd",{
                 expiresIn:"30d"
             })
             res.status(200).send({
