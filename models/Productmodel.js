@@ -1,7 +1,7 @@
 const mongoose=require("mongoose");
 
 const productschema=new mongoose.Schema({
-    name:{
+    title:{
         type:String,
         required:true
     },
@@ -14,19 +14,19 @@ const productschema=new mongoose.Schema({
         required:true
     },
     category:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Category"
+        type:String,
+        required:true
     },
     sub_title:{
         type:String,
         required:true
     },
     price:{
-        type:String,
+        type:Number,
         required:true
     },
     old_price:{
-        type:String,
+        type:Number,
         required:true
     },
     rating:{
@@ -37,4 +37,4 @@ const productschema=new mongoose.Schema({
 
 const productmodel=mongoose.model("Product",productschema);
 
-export default productmodel;
+module.exports=productmodel;

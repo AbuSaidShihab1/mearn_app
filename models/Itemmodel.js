@@ -2,13 +2,15 @@ const mongoose=require("mongoose");
 
 const Itemschema=new mongoose.Schema({
     id:String,
-    name:String,
+    title:String,
     price:Number,
     totalprice:Number,
     quantity:Number,
     image:String,
-    rating:Number,
+    rating:String,
     userid:String
 },{timestamps:true});
 
-const Itemmodel=mongoose.model("Item",Itemschema)
+const Itemmodel=mongoose.model("Item",Itemschema);
+
+module.exports=Itemmodel;

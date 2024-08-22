@@ -24,7 +24,7 @@ const registration_controller=async(req,res)=>{
            createuser.save();
            res.status(200).send({success:true,message:"Registration Successful!"});
     }catch(err){
-        console.log(err+"=> registration")
+        console.log(err+"=> registration");
     }
 };
 // user sign in controller

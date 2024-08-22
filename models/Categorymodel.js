@@ -7,9 +7,13 @@ const Categoryschema=new mongoose.Schema({
         trim:true,
         unique:true,
         maxLength:50
+    },
+    photo:{
+        type:String,
+        required:true
     }
 });
 
 const Categorymodel=mongoose.model("Category",Categoryschema);
 
-export default Categorymodel;
+module.exports=Categorymodel;
