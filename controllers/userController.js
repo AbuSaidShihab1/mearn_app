@@ -1,7 +1,8 @@
 const Usermodel=require("../models/usermodel");
 const bcrypt=require("bcryptjs")
-const jwt=require("jsonwebtoken");
+const JWT=require("jsonwebtoken");
 const usermodel = require("../models/usermodel");
+
 // user registration controller
 const registration_controller=async(req,res)=>{
     try{
@@ -45,9 +46,14 @@ const signin_controller=async(req,res)=>{
 
         //  if password match
         if(comparepasssword){
-            const token=jwt.sign({id:findemail._id},"ksjdsjd",{
-                expiresIn:"30d"
-            })
+            const token = JWT.sign({userId:findemail._id},"!@#$%^&*()",{
+                expiresIn:'365d'
+              });
+              res.cookie("token",token, {
+                expiresIn: new Date(Date.now() + 1000 * 30),
+                httpOnly: true,
+                sameSite: "lax",
+              });
             res.status(200).send({
                 success:true,
                 message:"Login Successful!",
@@ -70,19 +76,11 @@ const logoutcontroller=(req,res)=>{
 }
 // get user
 const getusercontroller=async(req,res)=>{
-    const token = req.headers?.authorization?.split(' ')[1];
-    if (!token) return res.status(400).json({ status: false, message: "Access Denied" })
-
-    jwt.verify(token,process.env.JWT_SECRET_CODE , async (err, decode) => {
-        const user = await usermodel.findById(decode?.id)
-        if(!user) return  res.status(400).json({ status: false, message: "Invalid Token"})
-        const userData = {
-            id: user?.id,
-            username: user?.username,
-            email: user?.email
-        }
-        return res.status(201).json({ status: true, message: "Profile Data", data: userData })
-    })
+   try{
+    res.json({user:req.user})
+   }catch(err){
+    console.log(err)
+   }
 
 }
 

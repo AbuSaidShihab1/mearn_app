@@ -17,12 +17,8 @@ const userschema=new mongoose.Schema({
         type:String,
         required:true
     },
-    carts:{
-         type:Array,
-         default:{
-            type:mongoose.Types.ObjectId,
-            ref:"Item"
-         }
+    address:{
+        type:String,
     },
     otp:{
         type:Number,

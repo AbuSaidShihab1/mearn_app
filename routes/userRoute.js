@@ -1,20 +1,75 @@
 const express=require("express");
 const route=express.Router();
 const {registration_controller,signin_controller,getusercontroller}=require("../controllers/userController");
-const { authmiddleware, isadmin } = require("../middleware/authmiddleware");
+const { Authenticated } = require("../middleware/authmiddleware");
 const Itemmodel = require("../models/Itemmodel");
 const usermodel = require("../models/usermodel");
 const productmodel = require("../models/Productmodel");
+const cartmodel = require("../models/Cartmodel");
 
 
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
-route.get("/user",getusercontroller);
-route.get("/admin-auth",authmiddleware,isadmin,(req,res)=>{
-    res.status(200).send({ok:true});
+route.get("/user",Authenticated,getusercontroller);
+// add to cart functionality
+route.post("/add-to-cart/:id",async(req,res)=>{
+    try{
+       const {id,title,price,quantity,image}=req.body;
+       console.log(req.headers)
+       const userid=req.params.id;
+       console.log(userid)
+     let findcart=await cartmodel.findOne({userid:userid});
+     let productprice=price;
+     if(!findcart){
+        findcart= new cartmodel({userid,items:[]});
+     }
+     const matchcartindex=findcart.items.findIndex((item)=>item.productid.toString()===id);
+     if(matchcartindex >-1){
+           findcart.items[matchcartindex].quantity +=quantity;
+           findcart.items[matchcartindex].price +=price*quantity;
+     }else{
+        findcart.items.push({productid:id,title,price,quantity,image,productprice,userid})
+     }
+     await findcart.save();;
+     res.send({success:true,message:"Cart have added!",findcart})
+    }catch(err){
+        console.log(err)
+    }
 });
+route.get("/user-cart/:id",async(req,res)=>{
+    try {
+        const userid=req.params.id;
+        let cart_item=await cartmodel.findOne({userid});
+        if(!cart_item){
+            return res.status(400).send({success:false,message:"Something went wrong!"})
+        };
+        res.status(200).send({success:true,message:"successful!",cart_item});
+    } catch (error) {
+        console.log(error)
+    }
+})
+route.delete("/remove-cart/:id",async(req,res)=>{
+    try {
+        const productid=req.params.id;
+        const userid=req.query.userid;
+        // console.log(req.query.userid)
+        let cart_item=await cartmodel.findOne({userid});
+      
+        const updatedList = cart_item['items'].filter(habit=> {
+            return !productid.includes(`${habit._id}`)
+          })
+        cart_item['items'] = updatedList;
+        if(!cart_item){
+            return res.status(400).send({success:false,message:"Something went wrong!"})
+        };
+        await cart_item.save();
+        res.status(200).send({success:true,message:"successful!",cart_item});
+    } catch (error) {
+        console.log(error)
+    }
+})
 // user add to cart
-route.post("/add-to-cart",async(req,res)=>{
+route.post("/add-to-car",async(req,res)=>{
     try{
        const {id,title,price,totalprice,quantity,image,rating,userid}=req.body;
        const matchaproduct=await Itemmodel.findOne({id,userid:userid});
@@ -64,6 +119,58 @@ route.post("/add-to-cart",async(req,res)=>{
         console.log(err)
     }
 });
+route.get("/user-cart",async(req,res)=>{
+    try{
+      let findcart=await cartmodel.findOne({userid:req.params.id});
+      if(!findcart){
+        return res.json({success:false,message:"SOmehting went wrong"});
+      }
+      return res.json({success:true,message:"Data has adding....."});
+    }catch(err){
+        console.log(err)
+    }
+})
+// increment cart quantity
+route.post("/decrement-quantity/:id",async(req,res)=>{
+    try{
+        const { productid, quantity} = req.body;
+
+        const userid = req.params.id;
+      
+        let cart = await cartmodel.findOne({ userid });
+
+        if (!cart) {
+          cart = new cartmodel({ userid, items: [] });
+          // return res.json({messge:'Cart not find'})
+        }
+      
+        const itemIndex = cart.items.findIndex(
+          (item) => item.productid.toString() === productid
+        );
+        console.log(itemIndex)
+        if (itemIndex > -1) {
+          const item = cart.items[itemIndex]
+      
+          if(item.quantity > quantity){
+              const pricePerUnit = item.price/item.quantity
+      
+              item.quantity -= quantity
+              item.price -= pricePerUnit*quantity
+          }else{
+              cart.items.splice(itemIndex,1)
+          }
+      
+        } else {
+          return res.json({messge:'invalid product Id'})
+        } 
+      
+        await cart.save();
+        res.json({ message: "Items qty decreased", cart });
+     }catch(err){
+         console.log(err)
+     }
+})
+
 // all product get
 route.get("/all-products",async(req,res)=>{
     try{
@@ -95,6 +202,24 @@ route.get("/user-product/:id",async(req,res)=>{
     }catch(err){
         console.log(err)
     }
+})
+route.get("/remove-cart-item/:id",async(req,res)=>{
+     try{
+        const matchusr=await cartmodel.findOne({userid:req.params.id});
+      
+        if(!matchusr){
+            return  res.status(400).send({
+                success:false,
+                message:"Something went wrong"
+            });
+       cart.items= cart.items.filter((item)=>{item.productid.toString() !== productid});
+       await matchusr.save();
+       res.json({success:true,message:"Data rmeoved!",cart:matchusr})
+
+    }
+     }catch(err){
+        console.log(err)
+     }
 })
 // remove user cart item
 route.delete("/delete-item/:id",async(req,res)=>{
