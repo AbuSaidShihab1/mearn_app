@@ -6,11 +6,58 @@ const Itemmodel = require("../models/Itemmodel");
 const usermodel = require("../models/usermodel");
 const productmodel = require("../models/Productmodel");
 const cartmodel = require("../models/Cartmodel");
+const Trendingmodel = require("../models/Trendingmodel");
+const Ordermodel = require("../models/Ordermodel");
 
 
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
 route.get("/user",Authenticated,getusercontroller);
+// product order 
+route.post("/order-products",(req,res)=>{
+    try {
+        const {userid,username,email,city,address,zipcode,carts,price}=req.body;
+    //   if(!userid || !name || !email || !city || !address || !zipcode || !products || !price){
+    //        return res.status(400).send({success:false,message:"Please Provide full information!"})
+    //   };
+    //   product order confirmation
+    const orderconfirm=new Ordermodel({
+        userid,
+        name:username,
+        email,
+        city,
+        address,
+        zipcode,
+        products:carts,
+        price
+    });
+    orderconfirm.save();
+    res.status(200).send({success:true,message:"Order Successful! 🔥 🔥 🔥 🔥",order:orderconfirm})
+    } catch (error) {
+        console.log(error)
+    }
+})
+// ordered product
+route.get("/ordered-item/:id",async(req,res)=>{
+    try {
+         const userordered=await Ordermodel.find({userid:req.params.id});
+         res.status(200).send({success:true,message:"Ordered item!",order:userordered})
+    } catch (error) {
+        console.log(error)
+    }
+})
+// single product page
+route.get("/product-details/:id",async(req,res)=>{
+    try{
+      let findcart=await productmodel.findOne({_id:req.params.id});
+      if(!findcart){
+        return res.json({success:false,message:"SOmehting went wrong"});
+      }
+      return res.json({success:true,message:"Data.....",product:findcart});
+    }catch(err){
+        console.log(err)
+    }
+})
 // add to cart functionality
 route.post("/add-to-cart/:id",async(req,res)=>{
     try{
@@ -26,7 +73,7 @@ route.post("/add-to-cart/:id",async(req,res)=>{
      const matchcartindex=findcart.items.findIndex((item)=>item.productid.toString()===id);
      if(matchcartindex >-1){
            findcart.items[matchcartindex].quantity +=quantity;
-           findcart.items[matchcartindex].price +=price*quantity;
+           findcart.items[matchcartindex].price +=productprice*quantity;
      }else{
         findcart.items.push({productid:id,title,price,quantity,image,productprice,userid})
      }
@@ -184,7 +231,19 @@ route.get("/all-products",async(req,res)=>{
         console.log(err)
     }
 });
-
+// all product get
+route.get("/all-trendign-products",async(req,res)=>{
+    try{
+          const getproducts=await Trendingmodel.find();
+          res.status(200).send({
+            success:true,
+            message:"Data sent succefully!",
+            products:getproducts
+          })
+    }catch(err){
+        console.log(err)
+    }
+});
 route.get("/user-product/:id",async(req,res)=>{
     try{
         const findcart_item=await Itemmodel.find({userid:req.params.id});
