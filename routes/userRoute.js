@@ -8,11 +8,61 @@ const productmodel = require("../models/Productmodel");
 const cartmodel = require("../models/Cartmodel");
 const Trendingmodel = require("../models/Trendingmodel");
 const Ordermodel = require("../models/Ordermodel");
-
-
+const Categorymodel = require("../models/Categorymodel");
+const Subcategorymodel=require("../models/Subcategorymodel");
+const subsubcategorymodel=require("../models/Subsubcategory")
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
 route.get("/user",Authenticated,getusercontroller);
+// category
+route.get("/main-category",async(req,res)=>{
+    try {
+        const maincategory=await Categorymodel.find();
+        const subcategory=await Subcategorymodel.find({maincategory:"Grocery"});
+        const subcategory2=await Subcategorymodel.find({maincategory:"Pharmacy"});
+        const subcategory3=await Subcategorymodel.find({maincategory:"Technology"});
+        const subcategory4=await Subcategorymodel.find({maincategory:"Skin Care"});
+        const subcategory5=await Subcategorymodel.find({maincategory:"Clothings"});
+        const subcategory6=await Subcategorymodel.find({maincategory:"LifeStyle"});
+        const findsubsubcategory=await subsubcategorymodel.find({maincategory:"Grocery"})
+        res.send({success:true,message:"Data get successfully!",
+            category:maincategory,subcategory1:subcategory,
+            subcategory2:subcategory2,subcategory3:subcategory3,
+            subcategory4:subcategory4,subcategory5:subcategory5,
+            subcategory6:subcategory6,subsubcategory:findsubsubcategory})
+    } catch (error) {
+        console.log(error)
+    }
+})
+route.get("/product-find-with-category",async(req,res)=>{
+    try {
+        const groceryproducts=await productmodel.find({category:"Grocery"});
+        const pharmacyproducts=await productmodel.find({category:"Pharmacy"});
+        const technologyproducts=await productmodel.find({category:"Technology"});
+        const skiproducts=await productmodel.find({category:"Skin Care"});
+        const clothingproducts=await productmodel.find({category:"CLothings"});
+        const lifestyleproducts=await productmodel.find({category:"LifeStyle"});
+
+        res.status(200).send({success:true,category1:groceryproducts,
+            category1:groceryproducts,
+            category2:pharmacyproducts,
+            category3:technologyproducts,
+            category4:skiproducts,
+            category5:clothingproducts,
+            category6:lifestyleproducts,
+        })
+    } catch (error) {
+        console.log(error)
+    }
+})
+route.get("/sub-category",async(req,res)=>{
+    try {
+        const subcategory=await Subcategorymodel.find();
+        res.send({success:true,message:"Data get successfully!",category:subcategory})
+    } catch (error) {
+        console.log(error)
+    }
+})
 // product order 
 route.post("/order-products",(req,res)=>{
     try {
@@ -351,6 +401,37 @@ route.get("/item-decrement/:id",async(req,res)=>{
             message:"Item quantity updated",
             cart_item:finditem
         });
+    } catch (error) {
+        console.log(error)
+    }
+})
+// --------------data search--------------
+route.get("/search-produts",async(req,res)=>{
+    try {
+        const search=req.query.title;
+        const findproducts=await productmodel.find({$or:[
+            {title:{$regex:'.*'+search+'.*',$options:'i'}},
+            {category:{$regex:'.*'+search+'.*',$options:'i'}},
+            {description:{$regex:'.*'+search+'.*',$options:'i'}},
+            {sub_title:{$regex:'.*'+search+'.*',$options:'i'}}
+        ]});
+        if(!findproducts){
+            return res.status(200).send({success:false,message:"Something went wrong"})
+        }
+        res.status(200).send({success:true,message:"Data get!",products:findproducts})
+    } catch (error) {
+        console.log(error)
+    }
+});
+// search page product find
+route.get("/searching-products",async(req,res)=>{
+    try {
+        const category=req.query.category;
+        const findproducts=await productmodel.find({category:category});
+        if(!findproducts){
+            return res.status(400).send({success:false,message:"Something went wrong!"});
+        }
+        res.status(200).send({success:true,message:"OK",products:findproducts});
     } catch (error) {
         console.log(error)
     }

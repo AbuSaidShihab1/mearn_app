@@ -5,6 +5,10 @@ const multer=require("multer");
 const Categorymodel = require("../models/Categorymodel");
 const Trendingmodel = require("../models/Trendingmodel");
 const Ordermodel = require("../models/Ordermodel");
+const subcategorycontroller=require("../models/Subcategorymodel")
+const Subcategorymodel=require("../models/Subcategorymodel");
+const Subsubcategorymodel = require("../models/Subsubcategory");
+const usermodel = require("../models/usermodel");
 // photo add
 const storage=multer.diskStorage({
     destination:function(req,file,cb){
@@ -101,6 +105,62 @@ admin_route.get("/admin-order-details/:id",async(req,res)=>{
     try {
         const ordertetails=await Ordermodel.findOne({_id:req.params.id});
         res.status(200).send({success:true,message:"Status updated!",orders:ordertetails});
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+// add sub category
+const substorage=multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,"./public/images")
+    },
+    filename:function(req,file,cb){
+        cb(null,`${Date.now()}_${file.originalname}`)
+    }
+
+});
+const subcategoryimgupload=multer({storage:substorage});
+admin_route.post("/add-sub-category",subcategoryimgupload.single("file"),(req,res)=>{
+    try {
+         const {name,maincategory}=req.body;
+         if(!maincategory || !name){
+           return res.status(200).send({success:true,message:"Please fill the information!"});
+         }
+         const addsubcategory=new Subcategorymodel({
+            maincategory,
+            subcategory:name,
+            image:req.file.filename
+         });
+         addsubcategory.save();
+    } catch (error) {
+        console.log(error)
+    }
+})
+// sub sub category
+admin_route.post("/add-sub-sub-category",subcategoryimgupload.single("file"),(req,res)=>{
+    try {
+         const {name,maincategory,subcategory}=req.body;
+         if(!maincategory || !name || !subcategory){
+           return res.status(200).send({success:false,message:"Please fill the information!"});
+         }
+         const addsubcategory=new Subsubcategorymodel({
+            maincategory,
+            subcategory,
+            subsubcategory:name,
+            image:req.file.filename
+         });
+         addsubcategory.save();
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+// all customer
+admin_route.get("/all-customers",async(req,res)=>{
+    try {
+        const customers=await usermodel.find();
+        res.send({success:true,message:"Data get successfully!",customers:customers})
     } catch (error) {
         console.log(error)
     }
