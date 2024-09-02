@@ -6,7 +6,7 @@ const Itemschema=new mongoose.Schema({
     price:Number,
     totalprice:Number,
     quantity:Number,
-    image:String,
+    photo:String,
     rating:String,
     userid:String
 },{timestamps:true});

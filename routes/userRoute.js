@@ -40,7 +40,7 @@ route.get("/product-find-with-category",async(req,res)=>{
         const pharmacyproducts=await productmodel.find({category:"Pharmacy"});
         const technologyproducts=await productmodel.find({category:"Technology"});
         const skiproducts=await productmodel.find({category:"Skin Care"});
-        const clothingproducts=await productmodel.find({category:"CLothings"});
+        const clothingproducts=await productmodel.find({category:"Clothings"});
         const lifestyleproducts=await productmodel.find({category:"LifeStyle"});
 
         res.status(200).send({success:true,category1:groceryproducts,

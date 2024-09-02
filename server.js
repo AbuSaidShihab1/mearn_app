@@ -23,11 +23,7 @@ server.use(router)
 server.use(admin_route)
 databse();
 server.get("/",(req,res)=>{
-    req.session.usename="Shihab";
-});
-server.get("/me",(req,res)=>{
-    console.log(req.session.usename)
-    res.send("he")
+    res.send("Hello world!")
 });
 server.listen(Port,function(){
     console.log(`Server is running on ${Port}`)

@@ -9,6 +9,8 @@ const subcategorycontroller=require("../models/Subcategorymodel")
 const Subcategorymodel=require("../models/Subcategorymodel");
 const Subsubcategorymodel = require("../models/Subsubcategory");
 const usermodel = require("../models/usermodel");
+const productmodel = require("../models/Productmodel");
+const uploadfile=require("../helper/upload");
 // photo add
 const storage=multer.diskStorage({
     destination:function(req,file,cb){
@@ -41,13 +43,37 @@ const categorystorage2=multer.diskStorage({
 });
 const uploadcategoryimage=multer({storage:categorystorage2});
 const trendingimageupload=multer({storage:storage3});
-
-admin_route.post("/product-add",uploadimage.single("file"),(req,res)=>{
+var uploader = multer({
+    storage:multer.diskStorage({})
+});
+var uploader2 = multer({
+    storage:multer.diskStorage({
+        destination:function(req,file,cb){
+            cb(null,"./public/images")
+        },
+        filename:function(req,file,cb){
+            cb(null,`${Date.now()}_${file.originalname}`)
+        }
+    })
+});
+var uploader3 = multer({
+    storage:multer.diskStorage({
+        destination:function(req,file,cb){
+            cb(null,"./public/images")
+        },
+        filename:function(req,file,cb){
+            cb(null,`${Date.now()}_${file.originalname}`)
+        }
+    })
+});
+admin_route.post("/product-add",uploader.single("file"),async(req,res)=>{
               try{
                     const {title,description,category,sub_title,price,old_price,rating}=req.body;
+                    const upload = await uploadfile.uploadFile(req.file.path);
+                    console.log(upload)
                     const productadd=new Productmodel({
                         title,description,
-                        photo:req.file.filename,
+                        photo:upload.secure_url,
                         category,sub_title,price,old_price,rating
                     });
                     productadd.save();
@@ -55,12 +81,13 @@ admin_route.post("/product-add",uploadimage.single("file"),(req,res)=>{
                 console.log(err)
               }
 });
-admin_route.post("/trending-product-add",trendingimageupload.single("file"),(req,res)=>{
+admin_route.post("/trending-product-add",uploader.single("file"),async(req,res)=>{
     try{
           const {title,description,category,sub_title,price,old_price,rating}=req.body;
+          const upload = await uploadfile.uploadFile(req.file.path);
           const productadd=new Trendingmodel({
               title,description,
-              photo:req.file.filename,
+              photo:upload.secure_url,
               category,sub_title,price,old_price,rating
           });
           productadd.save();
@@ -68,14 +95,16 @@ admin_route.post("/trending-product-add",trendingimageupload.single("file"),(req
       console.log(err)
     }
 });
-admin_route.post("/add-category",uploadcategoryimage.single("file"),(req,res)=>{
+admin_route.post("/add-category",uploader2.single("file"),async(req,res)=>{
     try{
             const {name}=req.body;
+            const upload = await uploadfile.uploadFile(req.file.path);
             const categoryadd=new Categorymodel({
                 name,
-                photo:req.file.filename
+                photo:upload.secure_url
             });
-            categoryadd.save();
+            categoryadd.save();;
+            console.log(categoryadd)
     }catch(err){
         console.log(err)
     }
@@ -121,26 +150,37 @@ const substorage=multer.diskStorage({
 
 });
 const subcategoryimgupload=multer({storage:substorage});
-admin_route.post("/add-sub-category",subcategoryimgupload.single("file"),(req,res)=>{
+admin_route.post("/add-sub-category",uploader3.single("file"),async(req,res)=>{
     try {
          const {name,maincategory}=req.body;
+         const upload = await uploadfile.uploadFile(req.file.path);
          if(!maincategory || !name){
            return res.status(200).send({success:true,message:"Please fill the information!"});
          }
-         const addsubcategory=new Subcategorymodel({
+
+         const addsubcategory= new Subcategorymodel({
             maincategory,
             subcategory:name,
-            image:req.file.filename
+            photo:upload.secure_url
          });
-         addsubcategory.save();
+         if(addsubcategory){
+            addsubcategory.save();
+            console.log(addsubcategory)
+            res.status(200).send({success:true,message:"ok",category:addsubcategory})
+         }else{
+            console.log("Something went wrong!")
+         }
+         console.log("Ok")
+
     } catch (error) {
         console.log(error)
     }
 })
 // sub sub category
-admin_route.post("/add-sub-sub-category",subcategoryimgupload.single("file"),(req,res)=>{
+admin_route.post("/add-sub-sub-category",uploader.single("file"),async(req,res)=>{
     try {
          const {name,maincategory,subcategory}=req.body;
+         const upload = await uploadfile.uploadFile(req.file.path);
          if(!maincategory || !name || !subcategory){
            return res.status(200).send({success:false,message:"Please fill the information!"});
          }
@@ -148,7 +188,7 @@ admin_route.post("/add-sub-sub-category",subcategoryimgupload.single("file"),(re
             maincategory,
             subcategory,
             subsubcategory:name,
-            image:req.file.filename
+            photo:upload.secure_url
          });
          addsubcategory.save();
     } catch (error) {
@@ -165,5 +205,13 @@ admin_route.get("/all-customers",async(req,res)=>{
         console.log(error)
     }
 })
-
+// product delete
+admin_route.delete("/product-delete/:id",async(req,res)=>{
+    try {
+         const deletedata=await productmodel.findByIdAndDelete({_id:req.params.id});
+         res.status(200).send({success:true,message:"Product deleted!"});
+    } catch (error) {
+        console.log(error)
+    }
+})
 module.exports=admin_route;

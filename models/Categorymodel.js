@@ -5,7 +5,6 @@ const Categoryschema=new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
-        unique:true,
         maxLength:50
     },
     photo:{

@@ -10,7 +10,7 @@ const cartschema=new mongoose.Schema({
         type:String,
         required:true
     },
-    image:{
+    photo:{
         type:String,
         required:true
     },
