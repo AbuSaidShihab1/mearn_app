@@ -20,6 +20,10 @@ const userschema=new mongoose.Schema({
     address:{
         type:String,
     },
+    account_type:{
+        type:String,
+        required:true
+    },
     otp:{
         type:Number,
         default:0

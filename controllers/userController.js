@@ -6,7 +6,8 @@ const usermodel = require("../models/usermodel");
 // user registration controller
 const registration_controller=async(req,res)=>{
     try{
-           const {username,email,password,phone}=req.body;
+           const {username,email,password,phone,account_type}=req.body;
+           console.log(username,email,password,phone,account_type)
            if(!username || !email || !password || !phone){
            return  res.send({success:false,message:"Please fill up your information!"})
            };
@@ -20,7 +21,7 @@ const registration_controller=async(req,res)=>{
            const hashsalt=await bcrypt.genSalt(10);
            const hashpassword=await bcrypt.hash(password,hashsalt)
            const createuser=new Usermodel({
-            username,email,password:hashpassword,phone
+            username,email,password:hashpassword,phone,account_type
            });
            createuser.save();
            res.status(200).send({success:true,message:"Registration Successful!"});
