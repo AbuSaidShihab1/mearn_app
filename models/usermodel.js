@@ -28,6 +28,10 @@ const userschema=new mongoose.Schema({
         type:Number,
         default:0
     },
+    selle_status:{
+         type:Number,
+         default:0
+    },
     is_admin:{
         type:Number,
         default:0,

@@ -10,7 +10,9 @@ const Trendingmodel = require("../models/Trendingmodel");
 const Ordermodel = require("../models/Ordermodel");
 const Categorymodel = require("../models/Categorymodel");
 const Subcategorymodel=require("../models/Subcategorymodel");
-const subsubcategorymodel=require("../models/Subsubcategory")
+const subsubcategorymodel=require("../models/Subsubcategory");
+const  Subsubcategory = require("../models/Subsubcategory");
+const flashproductmodel = require("../models/Flashsell");
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
 route.get("/user",Authenticated,getusercontroller);
@@ -36,12 +38,12 @@ route.get("/main-category",async(req,res)=>{
 })
 route.get("/product-find-with-category",async(req,res)=>{
     try {
-        const groceryproducts=await productmodel.find({category:"Grocery"});
-        const pharmacyproducts=await productmodel.find({category:"Pharmacy"});
-        const technologyproducts=await productmodel.find({category:"Technology"});
-        const skiproducts=await productmodel.find({category:"Skin Care"});
-        const clothingproducts=await productmodel.find({category:"Clothings"});
-        const lifestyleproducts=await productmodel.find({category:"LifeStyle"});
+        const groceryproducts=await productmodel.find({main_category:"Grocery"});
+        const pharmacyproducts=await productmodel.find({main_category:"Pharmacy"});
+        const technologyproducts=await productmodel.find({main_category:"Technology"});
+        const skiproducts=await productmodel.find({main_category:"Skin Care"});
+        const clothingproducts=await productmodel.find({main_category:"Clothings"});
+        const lifestyleproducts=await productmodel.find({main_category:"LifeStyle"});
 
         res.status(200).send({success:true,category1:groceryproducts,
             category1:groceryproducts,
@@ -59,6 +61,38 @@ route.get("/sub-category",async(req,res)=>{
     try {
         const subcategory=await Subcategorymodel.find();
         res.send({success:true,message:"Data get successfully!",category:subcategory})
+    } catch (error) {
+        console.log(error)
+    }
+})
+route.get("/sub-sub-category",async(req,res)=>{
+    try {
+        const subcategory=await Subsubcategory.find();
+        res.send({success:true,message:"Data get successfully!",category:subcategory})
+    } catch (error) {
+        console.log(error)
+    }
+})
+// filter sub sub category
+route.get("/filter-subsubcategory/:category",async(req,res)=>{
+    try{
+        const category=req.params.category;
+        console.log(category)
+        const find_category=await subsubcategorymodel.find({subcategory:category});
+        const find_product=await productmodel.find({sub_category:category})
+        res.send({
+            subsubcategory:find_category,
+            products:find_product
+        })
+    }catch(err){
+        console.log(err)
+    }
+})
+// onchane product filter
+route.get("/sub-sub-category-product-filter/:category",async(req,res)=>{
+    try {
+        const find_category_product=await productmodel.find({sub_sub_category:req.params.category});
+        console.log(find_category_product+"hello none")
     } catch (error) {
         console.log(error)
     }
@@ -125,7 +159,7 @@ route.post("/add-to-cart/:id",async(req,res)=>{
            findcart.items[matchcartindex].quantity +=quantity;
            findcart.items[matchcartindex].price +=productprice*quantity;
      }else{
-        findcart.items.push({productid:id,title,price,quantity,image,productprice,userid})
+        findcart.items.push({productid:id,title,price,quantity,photo:image,productprice,userid})
      }
      await findcart.save();;
      res.send({success:true,message:"Cart have added!",findcart})
@@ -281,10 +315,23 @@ route.get("/all-products",async(req,res)=>{
         console.log(err)
     }
 });
+// flash sell products
+route.get("/all-flash-sell-products",async(req,res)=>{
+    try{
+          const getproducts=await flashproductmodel.find();
+          res.status(200).send({
+            success:true,
+            message:"Data sent succefully!",
+            products:getproducts
+          })
+    }catch(err){
+        console.log(err)
+    }
+});
 // all product get
 route.get("/all-trendign-products",async(req,res)=>{
     try{
-          const getproducts=await Trendingmodel.find();
+          const getproducts=await productmodel.find({trending_product:"trending_product"});
           res.status(200).send({
             success:true,
             message:"Data sent succefully!",
@@ -406,9 +453,9 @@ route.get("/item-decrement/:id",async(req,res)=>{
     }
 })
 // --------------data search--------------
-route.get("/search-produts",async(req,res)=>{
+route.get("/search-produts/:result",async(req,res)=>{
     try {
-        const search=req.query.title;
+        const search=req.params.result;
         const findproducts=await productmodel.find({$or:[
             {title:{$regex:'.*'+search+'.*',$options:'i'}},
             {category:{$regex:'.*'+search+'.*',$options:'i'}},
@@ -418,22 +465,34 @@ route.get("/search-produts",async(req,res)=>{
         if(!findproducts){
             return res.status(200).send({success:false,message:"Something went wrong"})
         }
-        res.status(200).send({success:true,message:"Data get!",products:findproducts})
+        res.status(200).send({success:true,message:"Data get!",products:findproducts});
     } catch (error) {
         console.log(error)
     }
 });
 // search page product find
-route.get("/searching-products",async(req,res)=>{
+route.get("/searching-products/:category",async(req,res)=>{
     try {
-        const category=req.query.category;
-        const findproducts=await productmodel.find({category:category});
+        const category=req.params.category;
+        const findproducts=await productmodel.find({main_category:category});
         if(!findproducts){
             return res.status(400).send({success:false,message:"Something went wrong!"});
         }
         res.status(200).send({success:true,message:"OK",products:findproducts});
     } catch (error) {
         console.log(error)
+    }
+});
+// flsh sell product details
+route.get("/flash-product-details/:id",async(req,res)=>{
+    try{
+      let findcart=await flashproductmodel.findOne({_id:req.params.id});
+      if(!findcart){
+        return res.json({success:false,message:"SOmehting went wrong"});
+      }
+      return res.json({success:true,message:"Data.....",product:findcart});
+    }catch(err){
+        console.log(err)
     }
 })
 module.exports=route;

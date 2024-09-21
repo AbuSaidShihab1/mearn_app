@@ -1,9 +1,7 @@
 const mongoose=require("mongoose");
 
-const productschema=new mongoose.Schema({
-    photo:{
-        type:Array
-   },
+const flashproductschema=new mongoose.Schema({
+    photo:[],
     title:{
         type:String,
         required:true
@@ -59,19 +57,17 @@ const productschema=new mongoose.Schema({
     type:Number,
     required:true
    },
-   trending_product:{
-    type:String,
-   },
-   new_arrival:{
-    type:String
-   },
    approve:{
     type:Number,
     default:0
+   },
+   ending_time:{
+    type:String,
+    required:true
    }
    
 },{timestamps:true});
 
-const productmodel=mongoose.model("Product",productschema);
+const flashproductmodel=mongoose.model("Flash_sell",flashproductschema);
 
-module.exports=productmodel;
+module.exports=flashproductmodel;
