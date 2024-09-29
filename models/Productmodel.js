@@ -65,6 +65,10 @@ const productschema=new mongoose.Schema({
    new_arrival:{
     type:String
    },
+   user_id:{
+    type:String,
+    required:true
+   },
    approve:{
     type:Number,
     default:0

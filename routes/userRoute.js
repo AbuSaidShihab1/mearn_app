@@ -13,6 +13,7 @@ const Subcategorymodel=require("../models/Subcategorymodel");
 const subsubcategorymodel=require("../models/Subsubcategory");
 const  Subsubcategory = require("../models/Subsubcategory");
 const flashproductmodel = require("../models/Flashsell");
+const Blogmodel = require("../models/Blogmodel");
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
 route.get("/user",Authenticated,getusercontroller);
@@ -305,7 +306,7 @@ route.post("/decrement-quantity/:id",async(req,res)=>{
 // all product get
 route.get("/all-products",async(req,res)=>{
     try{
-          const getproducts=await productmodel.find();
+          const getproducts=await productmodel.find({approve:1});
           res.status(200).send({
             success:true,
             message:"Data sent succefully!",
@@ -495,4 +496,5 @@ route.get("/flash-product-details/:id",async(req,res)=>{
         console.log(err)
     }
 })
+
 module.exports=route;

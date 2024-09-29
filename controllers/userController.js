@@ -33,6 +33,7 @@ const registration_controller=async(req,res)=>{
 const signin_controller=async(req,res)=>{
     try{
          const {email,password}=req.body;
+         console.log(email)
          if(!email || !password){
             return res.send({success:false,message:"Invalid Email or Password!"})
          }

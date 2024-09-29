@@ -28,7 +28,7 @@ const userschema=new mongoose.Schema({
         type:Number,
         default:0
     },
-    selle_status:{
+    seller_status:{
          type:Number,
          default:0
     },
