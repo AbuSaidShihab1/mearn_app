@@ -7,6 +7,7 @@ const Trendingmodel = require("../models/Trendingmodel");
 const Ordermodel = require("../models/Ordermodel");
 const subcategorycontroller=require("../models/Subcategorymodel")
 const Subcategorymodel=require("../models/Subcategorymodel");
+const bcrypt=require("bcryptjs");
 const Subsubcategorymodel = require("../models/Subsubcategory");
 const usermodel = require("../models/usermodel");
 const productmodel = require("../models/Productmodel");
@@ -16,6 +17,7 @@ const flashproductmodel = require("../models/Flashsell");
 const Brandmodel = require("../models/Brandmodel");
 const Socialmodel = require("../models/Socialmodel");
 const Offertextmodel = require("../models/Offertextmodel");
+const FAQmodel = require("../models/Faqmodel");
 // photo add
 admin_route.use(express.static("public"))
 const storage=multer.diskStorage({
@@ -32,8 +34,7 @@ const uploadimage=multer({storage:storage});
 
 admin_route.post("/product-add",uploadimage.array("photo"),async(req,res)=>{
               try{
-                console.log("hello")
-                    const {title,description,tags,sizes,category,subcategory,
+                      const {title,description,tags,sizes,category,subcategory,
                         subsubcategory,price,old_price,discount,brand,approve,
                         trending_product,new_arrival,sub_title,user_id,
                         stock,productqyt}=req.body;
@@ -48,18 +49,17 @@ admin_route.post("/product-add",uploadimage.array("photo"),async(req,res)=>{
                     });
                     productadd.save();
               }catch(err){
-                console.log(err)
+                console.log(err.message+"dfsdfsdf")
               }
 });
 // flash sell product add
 admin_route.post("/flash-product-add",uploadimage.array("photo"),async(req,res)=>{
     try{
-      console.log("hello")
+
           const {title,description,tags,sizes,category,subcategory,
               subsubcategory,price,old_price,discount,brand,ending_time,sub_title,
               stock,productqyt}=req.body;
               const uploadedImages = req.files.map((file) => file.filename)
-              console.log(uploadedImages)
           const productadd=new flashproductmodel({
               photo:uploadedImages,
               title,description,tags,sizes,main_category:category,sub_category:subcategory,
@@ -68,13 +68,12 @@ admin_route.post("/flash-product-add",uploadimage.array("photo"),async(req,res)=
           });
           productadd.save();
     }catch(err){
-      console.log(err)
+      console.log(err.message+"dwewe")
     }
 });
 admin_route.post("/add-category",uploadimage.single("file"),async(req,res)=>{
     try{
             const {name}=req.body;
-            console.log(req.file)
             const categoryadd=new Categorymodel({
                 name,
                 photo:req.file.filename
@@ -82,14 +81,13 @@ admin_route.post("/add-category",uploadimage.single("file"),async(req,res)=>{
             categoryadd.save();;
             console.log(categoryadd)
     }catch(err){
-        console.log(err)
+        console.log(err.mess+"dadasds")
     }
 });
 admin_route.get("/single-main-category/:id",async(req,res)=>{
     try {
         const maincategory=await Categorymodel.findOne({_id:req.params.id});
         res.send({category:maincategory})
-         console.log(maincategory)
     } catch (error) {
         console.log(error)
     }
@@ -115,7 +113,6 @@ admin_route.delete("/admin-order-delete/:id",async(req,res)=>{
 admin_route.put("/update-order-status/:id",async(req,res)=>{
     try {
         const {status}=req.body;
-        console.log(status)
         const updatestatus=await Ordermodel.findByIdAndUpdate({_id:req.params.id},{status},{new:true});
         res.status(200).send({success:true,message:"Status updated!",orders:updatestatus});
     } catch (error) {
@@ -209,7 +206,8 @@ admin_route.get("/dashboard-data",async(req,res)=>{
           const processing_orders=await Ordermodel.find({status:"Processing"}).countDocuments();
           const Shipped_orders=await Ordermodel.find({status:"Shipped"}).countDocuments();
           const trending_product=await Productmodel.find({trending_product:"trending_product"}).countDocuments();
-         res.send({
+        
+          res.send({
             ordercount:ordercount,
             productcount:productcount,
             customercount:customercount,
@@ -256,7 +254,6 @@ admin_route.delete("/delete-user/:id",async(req,res)=>{
 admin_route.post("/add-blog",uploadimage.single("file"),(req,res)=>{
     try {
           const {title,description}=req.body;
-          console.log(title)
 
           const blogsave=new Blogmodel({
             photo:req.file.filename,
@@ -420,4 +417,90 @@ admin_route.delete("/admin-offer-text/:id",async(req,res)=>{
         console.log(error)
     }
 });
+// admin single page information
+admin_route.get("/admin-account-information/:id",async(req,res)=>{
+    try {
+        const account_info=await usermodel.findOne({_id:req.params.id});
+        console.log(account_info)
+        res.send({account_info});
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.post("/admin-account-update/:id",async(req,res)=>{
+    try {
+        const {username,email,password,phone}=req.body;
+        const passwordhash=await bcrypt.hash(password,10);
+        const account_info=await usermodel.findByIdAndUpdate({_id:req.params.id},{$set:{username,email,password:passwordhash,phone}});
+           if(account_info){
+               res.send({success:true})
+           }
+    } catch (error) {
+        console.log(error)
+    }
+});
+// delete admin
+admin_route.delete("/delete-admin-information/:id",async(req,res)=>{
+    try {
+        const delete_admin=await usermodel.findByIdAndDelete({_id:req.params.id});
+        if(delete_admin){
+                 res.send({success:true})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+// ----------------------------------faq add--------------------------
+admin_route.post("/admin-add-faq",async(req,res)=>{
+    try {
+        const {faqcategory,question,answeretext}=req.body;
+        const faq_text=new FAQmodel({
+            category_name:faqcategory,question:question,answere:answeretext
+        });
+        faq_text.save();
+        res.send({success:true})
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.delete("/delete-admin-faq/:id",async(req,res)=>{
+    try {
+        const faq_delete=await FAQmodel.findByIdAndDelete({_id:req.params.id});
+        if(faq_delete){
+                 res.send({success:true})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.post("/admin-faq-update/:id",async(req,res)=>{
+    try {
+        const {category_name,question,answere}=req.body;
+        const faq_text=await FAQmodel.findByIdAndUpdate({_id:req.params.id},{$set:{category_name,question,answere}});
+        if(faq_text){
+            res.send({success:true})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.get("/admin-all-faq",async(req,res)=>{
+    try {
+        const faq_text=await FAQmodel.find();
+        res.send({faq_text})
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.get("/admin-faq-information/:id",async(req,res)=>{
+    try {
+        const faq_text=await FAQmodel.findOne({_id:req.params.id});
+        res.send({faq_text});
+    } catch (error) {
+        console.log(error)
+    }
+});
+// ----------------------------------faq add--------------------------
+
 module.exports=admin_route;

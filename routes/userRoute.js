@@ -34,7 +34,7 @@ route.get("/main-category",async(req,res)=>{
             subcategory4:subcategory4,subcategory5:subcategory5,
             subcategory6:subcategory6,subsubcategory:findsubsubcategory})
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"category")
     }
 })
 route.get("/product-find-with-category",async(req,res)=>{
@@ -55,7 +55,7 @@ route.get("/product-find-with-category",async(req,res)=>{
             category6:lifestyleproducts,
         })
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"find")
     }
 })
 route.get("/sub-category",async(req,res)=>{
@@ -63,7 +63,7 @@ route.get("/sub-category",async(req,res)=>{
         const subcategory=await Subcategorymodel.find();
         res.send({success:true,message:"Data get successfully!",category:subcategory})
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"ewqw")
     }
 })
 route.get("/sub-sub-category",async(req,res)=>{
@@ -71,7 +71,7 @@ route.get("/sub-sub-category",async(req,res)=>{
         const subcategory=await Subsubcategory.find();
         res.send({success:true,message:"Data get successfully!",category:subcategory})
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"sdadas")
     }
 })
 // filter sub sub category
@@ -86,7 +86,7 @@ route.get("/filter-subsubcategory/:category",async(req,res)=>{
             products:find_product
         })
     }catch(err){
-        console.log(err)
+        console.log(err.message+"sdsd")
     }
 })
 // onchane product filter
@@ -95,7 +95,7 @@ route.get("/sub-sub-category-product-filter/:category",async(req,res)=>{
         const find_category_product=await productmodel.find({sub_sub_category:req.params.category});
         console.log(find_category_product+"hello none")
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"sub sub")
     }
 })
 // product order 
@@ -119,28 +119,29 @@ route.post("/order-products",(req,res)=>{
     orderconfirm.save();
     res.status(200).send({success:true,message:"Order Successful! 🔥 🔥 🔥 🔥",order:orderconfirm})
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"order product")
     }
 })
 // ordered product
 route.get("/ordered-item/:id",async(req,res)=>{
     try {
-         const userordered=await Ordermodel.find({userid:req.params.id});
+         const userordered=await Ordermodel.findOne({userid:req.params.id});
          res.status(200).send({success:true,message:"Ordered item!",order:userordered})
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"order item")
     }
 })
 // single product page
 route.get("/product-details/:id",async(req,res)=>{
     try{
-      let findcart=await productmodel.findOne({_id:req.params.id});
+        console.log(req.params.id)
+      const findcart=await productmodel.findOne({_id:req.params.id});
       if(!findcart){
         return res.json({success:false,message:"SOmehting went wrong"});
       }
       return res.json({success:true,message:"Data.....",product:findcart});
     }catch(err){
-        console.log(err)
+        console.log(err.message+"eweewq")
     }
 })
 // add to cart functionality
@@ -165,7 +166,7 @@ route.post("/add-to-cart/:id",async(req,res)=>{
      await findcart.save();;
      res.send({success:true,message:"Cart have added!",findcart})
     }catch(err){
-        console.log(err)
+        console.log(err+"cart")
     }
 });
 route.get("/user-cart/:id",async(req,res)=>{
@@ -177,7 +178,7 @@ route.get("/user-cart/:id",async(req,res)=>{
         };
         res.status(200).send({success:true,message:"successful!",cart_item});
     } catch (error) {
-        console.log(error)
+        console.log(error+"cart item")
     }
 })
 route.delete("/remove-cart/:id",async(req,res)=>{
@@ -197,14 +198,14 @@ route.delete("/remove-cart/:id",async(req,res)=>{
         await cart_item.save();
         res.status(200).send({success:true,message:"successful!",cart_item});
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"carttt")
     }
 })
 // user add to cart
 route.post("/add-to-car",async(req,res)=>{
     try{
        const {id,title,price,totalprice,quantity,image,rating,userid}=req.body;
-       const matchaproduct=await Itemmodel.findOne({id,userid:userid});
+       const matchaproduct=await Itemmodel.findOne({_id,userid:userid});
        if(matchaproduct){
                let updateitem=await Itemmodel.findOneAndUpdate({id,userid},{
                 $set:{
@@ -248,7 +249,7 @@ route.post("/add-to-car",async(req,res)=>{
         message:"Product Added!"
     })
     }catch(err){
-        console.log(err)
+        console.log(err.message+"add to cart")
     }
 });
 route.get("/user-cart",async(req,res)=>{
@@ -259,7 +260,7 @@ route.get("/user-cart",async(req,res)=>{
       }
       return res.json({success:true,message:"Data has adding....."});
     }catch(err){
-        console.log(err)
+        console.log(err.message+"user cart")
     }
 })
 // increment cart quantity
@@ -299,7 +300,7 @@ route.post("/decrement-quantity/:id",async(req,res)=>{
         await cart.save();
         res.json({ message: "Items qty decreased", cart });
      }catch(err){
-         console.log(err)
+         console.log(err.message+"sasdasd")
      }
 })
 
@@ -313,7 +314,7 @@ route.get("/all-products",async(req,res)=>{
             products:getproducts
           })
     }catch(err){
-        console.log(err)
+        console.log(err.message+" all product")
     }
 });
 // flash sell products
@@ -326,7 +327,7 @@ route.get("/all-flash-sell-products",async(req,res)=>{
             products:getproducts
           })
     }catch(err){
-        console.log(err)
+        console.log(err.message+"flash sell all")
     }
 });
 // all product get
@@ -339,12 +340,12 @@ route.get("/all-trendign-products",async(req,res)=>{
             products:getproducts
           })
     }catch(err){
-        console.log(err)
+        console.log(err.message+"sdasdas")
     }
 });
 route.get("/user-product/:id",async(req,res)=>{
     try{
-        const findcart_item=await Itemmodel.find({userid:req.params.id});
+        const findcart_item=await Itemmodel.findOne({userid:req.params.id});
          if(!findcart_item){
           return  res.status(400).send({
                 success:false,
@@ -357,7 +358,7 @@ route.get("/user-product/:id",async(req,res)=>{
             cart_item:findcart_item
         });
     }catch(err){
-        console.log(err)
+        console.log(err.message+"user product")
     }
 })
 route.get("/remove-cart-item/:id",async(req,res)=>{
@@ -375,7 +376,7 @@ route.get("/remove-cart-item/:id",async(req,res)=>{
 
     }
      }catch(err){
-        console.log(err)
+        console.log(err.message+"dasd")
      }
 })
 // remove user cart item
@@ -394,7 +395,7 @@ route.delete("/delete-item/:id",async(req,res)=>{
 
         });
     }catch(err){
-        console.log(err)
+        console.log(err.message+"wrong")
     }
 });
 
@@ -422,7 +423,7 @@ route.put("/item-quantity-increment/:id",async(req,res)=>{
             cart_item:finditem
         });
     }catch(err){
-        console.log(err)
+        console.log(err.message+"update quantity")
     }
 });
 
@@ -450,7 +451,7 @@ route.get("/item-decrement/:id",async(req,res)=>{
             cart_item:finditem
         });
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"increment")
     }
 })
 // --------------data search--------------
@@ -468,7 +469,7 @@ route.get("/search-produts/:result",async(req,res)=>{
         }
         res.status(200).send({success:true,message:"Data get!",products:findproducts});
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"search-product")
     }
 });
 // search page product find
@@ -481,7 +482,7 @@ route.get("/searching-products/:category",async(req,res)=>{
         }
         res.status(200).send({success:true,message:"OK",products:findproducts});
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"sear")
     }
 });
 // flsh sell product details
@@ -493,7 +494,7 @@ route.get("/flash-product-details/:id",async(req,res)=>{
       }
       return res.json({success:true,message:"Data.....",product:findcart});
     }catch(err){
-        console.log(err)
+        console.log(err.message+"flsssss")
     }
 })
 
