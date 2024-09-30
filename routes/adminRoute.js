@@ -18,6 +18,7 @@ const Brandmodel = require("../models/Brandmodel");
 const Socialmodel = require("../models/Socialmodel");
 const Offertextmodel = require("../models/Offertextmodel");
 const FAQmodel = require("../models/Faqmodel");
+const Newslettermodel = require("../models/Newslettermodel");
 // photo add
 admin_route.use(express.static("public"))
 const storage=multer.diskStorage({
@@ -81,7 +82,7 @@ admin_route.post("/add-category",uploadimage.single("file"),async(req,res)=>{
             categoryadd.save();;
             console.log(categoryadd)
     }catch(err){
-        console.log(err.mess+"dadasds")
+        console.log(err.message+"dadasds")
     }
 });
 admin_route.get("/single-main-category/:id",async(req,res)=>{
@@ -106,7 +107,7 @@ admin_route.delete("/admin-order-delete/:id",async(req,res)=>{
         try{
           const deleteproduct=await Ordermodel.findByIdAndDelete({_id:req.params.id});
         }catch(err){
-            console.log(err)
+            console.log(err.message)
         }
 })
 // order status change
@@ -151,7 +152,7 @@ admin_route.post("/add-sub-category",uploadimage.single("file"),async(req,res)=>
          console.log("Ok")
 
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // sub sub category
@@ -170,7 +171,7 @@ admin_route.post("/add-sub-sub-category",uploadimage.single("file"),async(req,re
          addsubcategory.save();
          console.log(addsubcategory)
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 });
 
@@ -180,7 +181,7 @@ admin_route.get("/all-customers",async(req,res)=>{
         const customers=await usermodel.find();
         res.send({success:true,message:"Data get successfully!",customers:customers})
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // product delete
@@ -190,7 +191,7 @@ admin_route.delete("/product-delete/:id",async(req
          const deletedata=await productmodel.findByIdAndDelete({_id:req.params.id});
          res.status(200).send({success:true,message:"Product deleted!"});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 });
 
@@ -219,7 +220,7 @@ admin_route.get("/dashboard-data",async(req,res)=>{
             Shipped_orders,
          })
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // all user 
@@ -230,7 +231,7 @@ admin_route.get("/all-customers",async(req,res)=>{
             customers:allcustomers
         })
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // single user data
@@ -247,7 +248,7 @@ admin_route.delete("/delete-user/:id",async(req,res)=>{
     try {
         const finduser=await usermodel.findByIdAndDelete({_id:req.params.id});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // blog add
@@ -266,7 +267,7 @@ admin_route.post("/add-blog",uploadimage.single("file"),(req,res)=>{
                     blogsave.save();
                     res.send({success:true})
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // blog data
@@ -275,7 +276,7 @@ admin_route.get("/admin-blog-data",async(req,res)=>{
         const blogdata=await Blogmodel.find();
         res.send({blogs:blogdata});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // product details for update
@@ -284,7 +285,7 @@ admin_route.get("/product-details/:id",async(req,res)=>{
          const find_product=await productmodel.findById({_id:req.params.id});
          res.send({product:find_product});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // create brand
@@ -299,7 +300,7 @@ admin_route.post("/add-new-brand",uploadimage.single("file"),(req,res)=>{
           addbrand.save();
           res.send({success:true})
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 });
 admin_route.get("/all-brands",async(req,res)=>{
@@ -307,7 +308,7 @@ admin_route.get("/all-brands",async(req,res)=>{
         const brands=await Brandmodel.find();
         res.send({brands});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // find admin
@@ -316,7 +317,7 @@ admin_route.get("/user-as-admin",async(req,res)=>{
         const admin=await usermodel.find({is_admin:1});
         res.send({admin});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // find seller profile
@@ -325,7 +326,17 @@ admin_route.get("/user-as-seller",async(req,res)=>{
         const seller=await usermodel.find({account_type:"seller",seller_status:1});
         res.send({seller});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
+    }
+});
+admin_route.delete("/delete-seller-account/:id",async(req,res)=>{
+    try {
+        const deleteaccount=await usermodel.findByIdAndDelete({_id:req.params.id});
+        if(deleteaccount){
+            res.send({success:true})
+        }
+    } catch (error) {
+        console.log(error.message+"dasd")
     }
 });
 admin_route.get("/seller-request",async(req,res)=>{
@@ -333,7 +344,7 @@ admin_route.get("/seller-request",async(req,res)=>{
         const seller=await usermodel.find({account_type:"seller",seller_status:0});
         res.send({seller});
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
 })
 // seller request approve
@@ -341,7 +352,7 @@ admin_route.post("/seller-approval/:id",async(req,res)=>{
     try {
         const seller=await usermodel.findByIdAndUpdate({_id:req.params.id},{$set:{seller_status:1}});
     } catch (error) {
-        console.log(error)
+        console.log(error.message+"sdasda")
     }
 })
 // seller product without approval
@@ -502,5 +513,37 @@ admin_route.get("/admin-faq-information/:id",async(req,res)=>{
     }
 });
 // ----------------------------------faq add--------------------------
+admin_route.post("/add-newsletter",async(req,res)=>{
+    try {
+        const {email}=req.body;
+        const newsletter=new Newslettermodel({
+           email
+        });
+        newsletter.save();
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.get("/newsletter-email",async(req,res)=>{
+    try {
+        const email=await Newslettermodel.find();
+        res.send({email})
+    } catch (error) {
+        console.log(error)
+    }
+});
+admin_route.delete("/delete-newsletter-email/:id",async(req,res)=>{
+    try {
+        const delete_email=await Newslettermodel.findByIdAndDelete({_id:req.params.id});
+        if(delete_email){
+                 res.send({success:true})
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
+// -------------------======================Newsletter=========================
+
+// -------------------======================Newsletter=========================
 
 module.exports=admin_route;
