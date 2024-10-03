@@ -32,6 +32,9 @@ const userschema=new mongoose.Schema({
          type:Number,
          default:0
     },
+    store_name:{
+      type:String
+    },
     is_admin:{
         type:Number,
         default:0,

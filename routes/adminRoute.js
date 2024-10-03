@@ -48,7 +48,11 @@ admin_route.post("/product-add",uploadimage.array("photo"),async(req,res)=>{
                         trending_product,new_arrival,user_id,approve,
                         stock,productqyt
                     });
+                    if(productadd){
                     productadd.save();
+                    res.send({success:true})
+                    }
+                    
               }catch(err){
                 console.log(err.message+"dfsdfsdf")
               }
@@ -67,7 +71,10 @@ admin_route.post("/flash-product-add",uploadimage.array("photo"),async(req,res)=
               sub_sub_category:subsubcategory,sub_title,price,old_price,discount,brand,
               ending_time,stock,productqyt
           });
-          productadd.save();
+          if(productadd){
+            res.send({success:true})
+            productadd.save();
+          }
     }catch(err){
       console.log(err.message+"dwewe")
     }
@@ -79,8 +86,11 @@ admin_route.post("/add-category",uploadimage.single("file"),async(req,res)=>{
                 name,
                 photo:req.file.filename
             });
-            categoryadd.save();;
-            console.log(categoryadd)
+            if(categoryadd){
+                categoryadd.save();
+                res.send({success:true})
+            }
+
     }catch(err){
         console.log(err.message+"dadasds")
     }
@@ -97,7 +107,9 @@ admin_route.get("/single-main-category/:id",async(req,res)=>{
 admin_route.get("/ordered-all-products",async(req,res)=>{
     try {
          const orderitem=await Ordermodel.find();
-            res.status(200).send({success:true,message:"Ordered Items!",orders:orderitem})
+         const incometed_orders=await Ordermodel.find({status:"Not Process",});
+         console.log(incometed_orders)
+            res.status(200).send({success:true,message:"Ordered Items!",orders:orderitem,incometed_orders})
     } catch (error) {
         console.log(error)
     }
@@ -144,12 +156,8 @@ admin_route.post("/add-sub-category",uploadimage.single("file"),async(req,res)=>
          });
          if(addsubcategory){
             addsubcategory.save();
-            console.log(addsubcategory)
-            res.status(200).send({success:true,message:"ok",category:addsubcategory})
-         }else{
-            console.log("Something went wrong!")
+            res.status(200).send({success:true})
          }
-         console.log("Ok")
 
     } catch (error) {
         console.log(error.message)
@@ -168,8 +176,10 @@ admin_route.post("/add-sub-sub-category",uploadimage.single("file"),async(req,re
             subsubcategory:name,
             photo:req.file.filename
          });
-         addsubcategory.save();
-         console.log(addsubcategory)
+         if(addsubcategory){
+            res.send({success:true})
+            addsubcategory.save();
+         }
     } catch (error) {
         console.log(error.message)
     }
@@ -243,10 +253,23 @@ admin_route.get("/single-user-data/:id",async(req,res)=>{
         console.log(error)
     }
 })
+// single seller data
+admin_route.get("/single-seller-data/:id",async(req,res)=>{
+    try {
+        const finduser=await usermodel.findOne({_id:req.params.id});
+        const product=await productmodel.find({userid:req.params.id});
+        res.send({seller:finduser,product})
+    } catch (error) {
+        console.log(error)
+    }
+})
 // delete user 
 admin_route.delete("/delete-user/:id",async(req,res)=>{
     try {
         const finduser=await usermodel.findByIdAndDelete({_id:req.params.id});
+        if(finduser){
+            res.send({success:true})
+        }
     } catch (error) {
         console.log(error.message)
     }
@@ -297,6 +320,9 @@ admin_route.post("/add-new-brand",uploadimage.single("file"),(req,res)=>{
             photo:req.file.filename,
             brand_type
           });
+          if(!addbrand){
+               console.log("something went wrong!")
+          }
           addbrand.save();
           res.send({success:true})
     } catch (error) {

@@ -172,7 +172,7 @@ route.post("/add-to-cart/:id",async(req,res)=>{
 route.get("/user-cart/:id",async(req,res)=>{
     try {
         const userid=req.params.id;
-        let cart_item=await cartmodel.findOne({userid});
+        let cart_item=await cartmodel.findOne({userid:"66d99c463fc3b28d66b851e1"});
         if(!cart_item){
             return res.status(400).send({success:false,message:"Something went wrong!"})
         };

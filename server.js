@@ -15,17 +15,13 @@ server.use(express.json());
 server.use(express.static("public"))
 server.use(session({secret: 'keyboard cat',}))
 server.use(cookieParser())
-server.use(cors({
-    origin:true,
-    methods:[ "GET","POST","PUT","DELETE"],
-    credentials:true
-  }));
+server.use(cors());
 server.use(router)
 server.use(admin_route)
 server.use(seller_route)
 databse();
 server.get("/",(req,res)=>{
-    res.send("Hello world!")
+    res.send("Hello worldddd!")
 });
 server.listen(Port,function(){
     console.log(`Server is running on ${Port}`)
