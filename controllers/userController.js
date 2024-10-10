@@ -2,6 +2,7 @@ const Usermodel=require("../models/usermodel");
 const bcrypt=require("bcryptjs")
 const JWT=require("jsonwebtoken");
 const usermodel = require("../models/usermodel");
+const Contactmodel = require("../models/Contactmodel");
 
 // user registration controller
 const registration_controller=async(req,res)=>{
@@ -85,5 +86,20 @@ const getusercontroller=async(req,res)=>{
    }
 
 }
+// contact controller
+const contactcontroller=(req,res)=>{
+    try {
+        const {name,email,subject,phone,message}=req.body;
+        const contact_data=new Contactmodel({
+            name,email,subject,phone,message
+        });
+        if(contact_data){
+            res.send({success:true})
+            contact_data.save()
+        }
 
-module.exports={registration_controller,signin_controller,logoutcontroller,getusercontroller}
+    } catch (error) {
+        console.log(error)
+    }
+}
+module.exports={registration_controller,signin_controller,logoutcontroller,getusercontroller,contactcontroller}

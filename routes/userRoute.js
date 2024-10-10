@@ -1,6 +1,6 @@
 const express=require("express");
 const route=express.Router();
-const {registration_controller,signin_controller,getusercontroller}=require("../controllers/userController");
+const {registration_controller,signin_controller,getusercontroller,contactcontroller}=require("../controllers/userController");
 const { Authenticated } = require("../middleware/authmiddleware");
 const Itemmodel = require("../models/Itemmodel");
 const usermodel = require("../models/usermodel");
@@ -17,6 +17,7 @@ const Blogmodel = require("../models/Blogmodel");
 route.post("/registration",registration_controller);
 route.post("/login",signin_controller);
 route.get("/user",Authenticated,getusercontroller);
+route.post("/contact",contactcontroller);
 // category
 route.get("/main-category",async(req,res)=>{
     try {
@@ -99,7 +100,7 @@ route.get("/sub-sub-category-product-filter/:category",async(req,res)=>{
     }
 })
 // product order 
-route.post("/order-products",(req,res)=>{
+route.post("/order-products",async(req,res)=>{
     try {
         const {userid,username,email,city,address,zipcode,carts,price}=req.body;
     //   if(!userid || !name || !email || !city || !address || !zipcode || !products || !price){
@@ -116,6 +117,8 @@ route.post("/order-products",(req,res)=>{
         products:carts,
         price
     });
+    const clearproduct=await cartmodel.findOneAndUpdate({userid:userid},{$set:{items:[]}});
+    console.log(clearproduct)
     orderconfirm.save();
     res.status(200).send({success:true,message:"Order Successful! 🔥 🔥 🔥 🔥",order:orderconfirm})
     } catch (error) {
@@ -172,7 +175,7 @@ route.post("/add-to-cart/:id",async(req,res)=>{
 route.get("/user-cart/:id",async(req,res)=>{
     try {
         const userid=req.params.id;
-        let cart_item=await cartmodel.findOne({userid:"66d99c463fc3b28d66b851e1"});
+        let cart_item=await cartmodel.findOne({userid});
         if(!cart_item){
             return res.status(400).send({success:false,message:"Something went wrong!"})
         };
@@ -476,7 +479,13 @@ route.get("/search-produts/:result",async(req,res)=>{
 route.get("/searching-products/:category",async(req,res)=>{
     try {
         const category=req.params.category;
-        const findproducts=await productmodel.find({main_category:category});
+        const sub_category=req.query.sub_category;
+        const sub_sub_category=req.params.sub_sub_category;
+        const findproducts=await  productmodel.find({$or:[
+            {main_category:{$regex:'.*'+category+'.*',$options:'i'}},
+            {sub_sub_category:{$regex:'.*'+sub_category+'.*',$options:'i'}},
+            {sub_category:{$regex:'.*'+sub_sub_category+'.*',$options:'i'}},
+        ]});
         if(!findproducts){
             return res.status(400).send({success:false,message:"Something went wrong!"});
         }

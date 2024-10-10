@@ -7,6 +7,7 @@ const Trendingmodel = require("../models/Trendingmodel");
 const Ordermodel = require("../models/Ordermodel");
 const subcategorycontroller=require("../models/Subcategorymodel")
 const Subcategorymodel=require("../models/Subcategorymodel");
+const {admincontactcontroller}=require("../controllers/admincontroller")
 const bcrypt=require("bcryptjs");
 const Subsubcategorymodel = require("../models/Subsubcategory");
 const usermodel = require("../models/usermodel");
@@ -571,5 +572,8 @@ admin_route.delete("/delete-newsletter-email/:id",async(req,res)=>{
 // -------------------======================Newsletter=========================
 
 // -------------------======================Newsletter=========================
+
+// -------------contact data-------------
+admin_route.get("/contact-data",admincontactcontroller)
 
 module.exports=admin_route;

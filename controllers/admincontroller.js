@@ -1,3 +1,4 @@
+const Contactmodel = require("../models/Contactmodel");
 const Subcategorymodel = require("../models/Subcategorymodel");
 
 const subcategorycontroller=(req,res)=>{
@@ -16,4 +17,14 @@ const subcategorycontroller=(req,res)=>{
     }
 };
 
-module.exports={subcategorycontroller}
+// -------------contact controlelr----------
+const admincontactcontroller=async(req,res)=>{
+  try {
+      const contact_data=await Contactmodel.find();
+      console.log(contact_data)
+      res.send({contact_data})
+  } catch (error) {
+      console.log(error)
+  }
+};
+module.exports={subcategorycontroller,admincontactcontroller}

@@ -10,9 +10,9 @@ const cartschema=new mongoose.Schema({
         type:String,
         required:true
     },
-    photo:{
-        type:String,
-        required:true
+    photo:
+    {
+        type:Array
     },
     quantity:{
         type:Number,
